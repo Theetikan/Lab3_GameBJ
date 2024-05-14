@@ -464,30 +464,24 @@ void RandomNum(){
 
 void Switch()
 {
-	if (SPIRx[2]== 15 ){
-		click = 1;
-	if (SPIRx[2]== 7 && click == 1 ) // ปุ่ม 1 ถูกกด (0000 0001) P1 hit
-		{
+		if (SPIRx[2]== 7 ) // ปุ่ม 1 ถูกกด (0000 0001) P1 hit
+			{
 			ScorePlayer1 += random_number1; // random the number
-			click = 0;
-		}
-	else if (SPIRx[2] ==11) // ปุ่ม 2 ถูกกด (0000 0010) P1 stand
+			}
+		else if (SPIRx[2] ==11) // ปุ่ม 2 ถูกกด (0000 0010) P1 stand
 			{
 			P1Finish = 1;
-			click = 0;
-	}
-	else if (SPIRx[2] == 13) // ปุ่ม 3 ถูกกด (0000 0100) P2 hit
+			}
+		else if (SPIRx[2] == 13) // ปุ่ม 3 ถูกกด (0000 0100) P2 hit
 			{
-		ScorePlayer2 += random_number2; // random the number
-		click = 0;
-	}
-	else if (SPIRx[2] == 14) // ปุ่ม 4 ถูกกด (0000 1000) P2 stand
+			ScorePlayer2 += random_number2; // random the number
+			}
+		else if (SPIRx[2] == 14) // ปุ่ม 4 ถูกกด (0000 1000) P2 stand
 			{
 			P2Finish = 1;
-			click = 0;
 			}
 	}
-}
+
 
 void StateGame(){
 	if (P1Finish == 1 && P2Finish == 1){
