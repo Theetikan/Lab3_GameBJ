@@ -549,7 +549,7 @@ void LED() {
 				SPITx[2] = 0b11111110; // LED ON
 		}
 		if (State == 0) { //playing
-			SPITx[2] = 0b00000001; // LED ON
+			SPITx[2] = 0b00010001; // LED ON
 		}
 	}
 

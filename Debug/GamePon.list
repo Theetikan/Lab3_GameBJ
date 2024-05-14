@@ -1727,9 +1727,9 @@ void LED() {
  8000db4:	681b      	ldr	r3, [r3, #0]
  8000db6:	2b00      	cmp	r3, #0
  8000db8:	d102      	bne.n	8000dc0 <LED+0x48>
-			SPITx[2] = 0b00000001; // LED ON
+			SPITx[2] = 0b00010001; // LED ON
  8000dba:	4b04      	ldr	r3, [pc, #16]	; (8000dcc <LED+0x54>)
- 8000dbc:	2201      	movs	r2, #1
+ 8000dbc:	2211      	movs	r2, #17
  8000dbe:	709a      	strb	r2, [r3, #2]
 		}
 	}
