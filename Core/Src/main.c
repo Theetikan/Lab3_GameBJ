@@ -66,8 +66,10 @@ int ScorePlayer1;
 int ScorePlayer2;
 int P1Finish;
 int P2Finish;
-int random_number;
+int random_number1;
+int random_number2;
 int i;
+int click;
 
 int iterations = 10;
 
@@ -438,33 +440,52 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi) {
 }
 
 void RandomNum(){
-	// Seed the random number generator
+	 // Seed the random number generator
 	    srand(time(NULL));
 
+	    // Number of iterations for the loop
+	    int iterations = 10;
+	    int i;
+
 	    for (i = 0; i < iterations; i++) {
-	        // Generate a random number between 1 and 10
-	        int random_number = rand() % 10 + 1;
+	        // Generate two random numbers between 1 and 10
+	        random_number1 = rand() % 10 + 1;
+	        random_number2;
+
+	        // Generate random_number2 until it is different from random_number1
+	        do {
+	            random_number2 = rand() % 10 + 1;
+	        } while (random_number2 == random_number1);
+
+	        printf("Random numbers: %d, %d\n", random_number1, random_number2);
 	    }
 }
 
 
 void Switch()
 {
-	if (SPIRx[2]== 1 ) // ปุ่ม 1 ถูกกด (0000 0001) P1 hit
+	if (SPIRx[2]== 15 ){
+		click = 1;
+	if (SPIRx[2]== 7 && click == 1 ) // ปุ่ม 1 ถูกกด (0000 0001) P1 hit
 		{
-			ScorePlayer1 += random_number; // random the number
+			ScorePlayer1 += random_number1; // random the number
+			click = 0;
 		}
-	else if (SPIRx[2] == 10) // ปุ่ม 2 ถูกกด (0000 0010) P1 stand
+	else if (SPIRx[2] ==11) // ปุ่ม 2 ถูกกด (0000 0010) P1 stand
 			{
 			P1Finish = 1;
+			click = 0;
 	}
-	else if (SPIRx[2] == 100) // ปุ่ม 3 ถูกกด (0000 0100) P2 hit
+	else if (SPIRx[2] == 13) // ปุ่ม 3 ถูกกด (0000 0100) P2 hit
 			{
-		ScorePlayer2 += random_number; // random the number
+		ScorePlayer2 += random_number2; // random the number
+		click = 0;
 	}
-	else if (SPIRx[2] == 1000) // ปุ่ม 4 ถูกกด (0000 1000) P2 stand
+	else if (SPIRx[2] == 14) // ปุ่ม 4 ถูกกด (0000 1000) P2 stand
 			{
 			P2Finish = 1;
+			click = 0;
+			}
 	}
 }
 
@@ -493,22 +514,22 @@ void LED() {
 		case 3:
 			SPITx[0] = 0b01000000; // write
 			SPITx[1] = 0x15; // OLATB
-			SPITx[2] = 0b10000000; // LED ON
+			SPITx[2] = 0b11111110; // LED ON
 			break;
 		case 1:
 			SPITx[0] = 0b01000000; // write
 			SPITx[1] = 0x15; // OLATB
-			SPITx[2] = 0b01000000; // LED ON
+			SPITx[2] = 0b11111110; // LED ON
 			break;
 		case 2:
 			SPITx[0] = 0b01000000; // write
 			SPITx[1] = 0x15; // OLATB
-			SPITx[2] = 0b00100000; // LED ON
+			SPITx[2] = 0b11111110; // LED ON
 			break;
 		default: // Playing
 			SPITx[0] = 0b01000000; // write
 			SPITx[1] = 0x15; // OLATB
-			SPITx[2] = 0b00010000; // LED ON
+			//SPITx[2] = 0b11111110; // LED ON
 			break;
 		}
 	}
