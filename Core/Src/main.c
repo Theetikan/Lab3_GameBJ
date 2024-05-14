@@ -18,6 +18,9 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -55,6 +58,16 @@ uint8_t eepromDataReadBack[4];
 
 uint8_t SPIRx[10];
 uint8_t SPITx[10];
+
+int State;
+int TotalScorePlayer1;
+int TotalScorePlayer2;
+int ScorePlayer1;
+int ScorePlayer2;
+int P1Finish;
+int P2Finish;
+int random_number;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -124,9 +137,13 @@ int main(void)
 
 	  SPITxRx_readIO();
 
+	  Switch();
+	  StateGame();
+	  LED();
+	  }
+
   }
   /* USER CODE END 3 */
-}
 
 /**
   * @brief System Clock Configuration
@@ -416,6 +433,82 @@ void SPITxRx_readIO() {
 void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi) {
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, 1); //CS dnSelect
 }
+
+void RandomNum(){
+	// Seed the random number generator with the current time
+	    srand(time(NULL));
+
+	    // Generate a random number between 1 and 10
+	    int random_number = (rand() % 10) + 1;
+
+}
+
+
+void Switch()
+{
+	if (SPIRx[2]== 1 ) // ปุ่ม 1 ถูกกด (0000 0001)
+		{
+			ScorePlayer1 += random_number; // random the number
+		}
+	else if (SPIRx[2] == 10) // ปุ่ม 2 ถูกกด (0000 0010)
+			{
+			P1Finish = 1;
+	}
+	else if (SPIRx[2] == 100) // ปุ่ม 3 ถูกกด (0000 0100)
+			{
+		ScorePlayer2 += random_number; // random the number
+	}
+	else if (SPIRx[2] == 1000) // ปุ่ม 4 ถูกกด (0000 1000)
+			{
+			P2Finish = 1;
+	}
+}
+
+void StateGame(){
+	if (P1Finish == 1 && P2Finish == 1){
+		TotalScorePlayer1 = ScorePlayer1 ;
+		TotalScorePlayer2 = ScorePlayer2 ;
+		if (TotalScorePlayer1 == TotalScorePlayer2) {
+	       State = 3; //Tie
+		}
+		else if (TotalScorePlayer1 > 21 && TotalScorePlayer2 > 21) {
+	       State = 3; //Tie
+		}
+		else if (TotalScorePlayer1 > TotalScorePlayer2 && TotalScorePlayer1 <= 21) {
+	       State = 1; //Player1Win
+		}
+		else if (TotalScorePlayer2 > TotalScorePlayer1 && TotalScorePlayer2 <= 21) {
+	       State = 2; //Player2Win
+		}
+	}
+}
+
+
+void LED() {
+		switch (State) {
+		case 3:
+			SPITx[0] = 0b01000000; // write
+			SPITx[1] = 0x15; // OLATB
+			SPITx[2] = 0b10000000; // LED ON
+			break;
+		case 1:
+			SPITx[0] = 0b01000000; // write
+			SPITx[1] = 0x15; // OLATB
+			SPITx[2] = 0b01000000; // LED ON
+			break;
+		case 2:
+			SPITx[0] = 0b01000000; // write
+			SPITx[1] = 0x15; // OLATB
+			SPITx[2] = 0b00100000; // LED ON
+			break;
+		default: // Playing
+			SPITx[0] = 0b01000000; // write
+			SPITx[1] = 0x15; // OLATB
+			SPITx[2] = 0b00010000; // LED ON
+			break;
+		}
+	}
+
 
 /* USER CODE END 4 */
 
