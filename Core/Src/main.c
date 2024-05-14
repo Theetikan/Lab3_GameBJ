@@ -73,6 +73,7 @@ int click;
 
 int iterations = 10;
 
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -125,7 +126,7 @@ int main(void)
   MX_SPI3_Init();
   /* USER CODE BEGIN 2 */
   SPITxRx_Setup();
-
+  WriteLED();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -146,12 +147,11 @@ int main(void)
 	  StateGame();
 	  LED();
 
-	  srand(time(NULL));
+	  //Random Number
+		srand(time(NULL));
+		random_number1 = random_between(1, 10);
+		random_number2 = random_between(1, 10);
 
-	      printf("Random between 1 to 10\n");
-	      for (int i = 0; i < 10; i++) {
-	         random_between(1, 10);
-	      }
 	  }
 
   }
@@ -438,38 +438,28 @@ void SPITxRx_readIO() {
 		SPITx[0] = 0b01000001; //what to do receive or transmit (1 == receive)
 		SPITx[1] = 0x12; //address
 		SPITx[2] = 0;
-		HAL_SPI_TransmitReceive_IT(&hspi3, SPITx, SPIRx, 4);
+		HAL_SPI_TransmitReceive_IT(&hspi3, SPITx, SPIRx, 3);
 	}
 }
+
+void WriteLED(){
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, 0);
+	SPITx[0] = 0b01000000;//write
+	SPITx[1] = 0x01;//IODIRB
+	SPITx[2] = 0b00000000;
+	HAL_SPI_TransmitReceive_IT(&hspi3, SPITx, SPIRx, 3);
+}
+
 void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi) {
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, 1); //CS dnSelect
 }
+
 
 int random_between(int min, int max)
 {
     int r = (rand() / (float) RAND_MAX) * (max + 1) + min;
     return r > max ? max: r;
-}
 
-void RandomNum(){
-	 // Seed the random number generator
-	    srand(time(NULL));
-
-	    // Number of iterations for the loop
-	    int iterations = 10;
-	    int i;
-
-	    for (i = 0; i < iterations; i++) {
-	        // Generate two random numbers between 1 and 10
-	        random_number1 = rand() % 10 + 1;
-	        random_number2;
-
-	        // Generate random_number2 until it is different from random_number1
-	        do {
-	            random_number2 = rand() % 10 + 1;
-	        } while (random_number2 == random_number1);
-
-	    }
 }
 
 
@@ -524,6 +514,13 @@ void StateGame(){
 		else if (TotalScorePlayer2 > TotalScorePlayer1 && TotalScorePlayer2 <= 21) {
 	       State = 2; //Player2Win
 		}
+		else if (TotalScorePlayer2 >21 && TotalScorePlayer2 <= 21  ) {
+			State = 1; //Player1Win
+		}
+		else if (TotalScorePlayer1 >21 && TotalScorePlayer1 <= 21  ) {
+					State = 2; //Player1Win
+				}
+
 	}
 }
 
@@ -531,9 +528,10 @@ void StateGame(){
 void LED() {
 		switch (State) {
 		case 3:
+//			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, 0);
 			SPITx[0] = 0b01000000; // write
 			SPITx[1] = 0x15; // OLATB
-			SPITx[2] = 0b11111110; // LED ON
+			SPITx[2] = 0b11111110; // LED ON                                                                              2
 			break;
 		case 1:
 			SPITx[0] = 0b01000000; // write
@@ -548,7 +546,7 @@ void LED() {
 		default: // Playing
 			SPITx[0] = 0b01000000; // write
 			SPITx[1] = 0x15; // OLATB
-			//SPITx[2] = 0b11111110; // LED ON
+			SPITx[2] = 0b00010000; // LED ON
 			break;
 		}
 	}
