@@ -67,6 +67,9 @@ int ScorePlayer2;
 int P1Finish;
 int P2Finish;
 int random_number;
+int i;
+
+int iterations = 10;
 
 /* USER CODE END PV */
 
@@ -137,6 +140,7 @@ int main(void)
 
 	  SPITxRx_readIO();
 
+	  RandomNum();
 	  Switch();
 	  StateGame();
 	  LED();
@@ -408,11 +412,10 @@ void EEPROMWriteExample() {
 }
 
 void EEPROMReadExample(uint8_t *Rdata, uint16_t len) {
-	if (eepromExampleReadFlag && hi2c1.State == HAL_I2C_STATE_READY) {
 		HAL_I2C_Mem_Read_IT(&hi2c1, EEPROM_ADDR, 0x2C, I2C_MEMADD_SIZE_16BIT,Rdata, len);
 		eepromExampleReadFlag = 0;
 	}
-}
+
 
 void SPITxRx_Setup() {
 //CS pulse
@@ -435,30 +438,31 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi) {
 }
 
 void RandomNum(){
-	// Seed the random number generator with the current time
+	// Seed the random number generator
 	    srand(time(NULL));
 
-	    // Generate a random number between 1 and 10
-	    int random_number = (rand() % 10) + 1;
-
+	    for (i = 0; i < iterations; i++) {
+	        // Generate a random number between 1 and 10
+	        int random_number = rand() % 10 + 1;
+	    }
 }
 
 
 void Switch()
 {
-	if (SPIRx[2]== 1 ) // ปุ่ม 1 ถูกกด (0000 0001)
+	if (SPIRx[2]== 1 ) // ปุ่ม 1 ถูกกด (0000 0001) P1 hit
 		{
 			ScorePlayer1 += random_number; // random the number
 		}
-	else if (SPIRx[2] == 10) // ปุ่ม 2 ถูกกด (0000 0010)
+	else if (SPIRx[2] == 10) // ปุ่ม 2 ถูกกด (0000 0010) P1 stand
 			{
 			P1Finish = 1;
 	}
-	else if (SPIRx[2] == 100) // ปุ่ม 3 ถูกกด (0000 0100)
+	else if (SPIRx[2] == 100) // ปุ่ม 3 ถูกกด (0000 0100) P2 hit
 			{
 		ScorePlayer2 += random_number; // random the number
 	}
-	else if (SPIRx[2] == 1000) // ปุ่ม 4 ถูกกด (0000 1000)
+	else if (SPIRx[2] == 1000) // ปุ่ม 4 ถูกกด (0000 1000) P2 stand
 			{
 			P2Finish = 1;
 	}
