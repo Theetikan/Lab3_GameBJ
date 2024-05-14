@@ -73,8 +73,6 @@ int click;
 
 int iterations = 10;
 
-int StateRx_Tx;
-int Start;
 
 /* USER CODE END PV */
 
@@ -148,7 +146,7 @@ int main(void)
 
 	  Switch();
 	  StateGame();
-//	  LED();
+	  LED();
 
 	  //Random Number
 		srand(time(NULL));
@@ -447,29 +445,9 @@ void SPITxRx_readIO() {
 
 void WriteLED(){
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, 0);
-	if (StateRx_Tx == 1){
 	SPITx[0] = 0b01000000;//write
 	SPITx[1] = 0x01;//IODIRB
 	SPITx[2] = 0b00000000;
-	}
-
-	else {
-	SPITx[0] = 0b01000000; // write
-	SPITx[1] = 0x15; // OLATB
-	if (State == 3) { //tie
-		SPITx[2] = 0b11111110; // LED ON
-	}
-	if (State == 1) { // p1 win
-		SPITx[2] = 0b11111110; // LED ON
-	}
-	if (State == 2) { //p2 win
-		SPITx[2] = 0b11111110; // LED ON
-	}
-
-	if (State == 0) { //playing
-		SPITx[2] = 0b00010001; // LED ON
-	}
-	}
 	HAL_SPI_TransmitReceive_IT(&hspi3, SPITx, SPIRx, 3);
 }
 
@@ -488,36 +466,36 @@ int random_between(int min, int max)
 
 void Switch()
 {
-	if (Start == 1) {
-		StateRx_Tx = 1;
-		if (SPIRx[2] == 15) {
-			click = 0;
-		}
-		if (click == 0) {
-			StateRx_Tx = 1;
-			if (SPIRx[2] == 7) // Button 1 pressed (0000 0001) P1 hit
-					{
-				click = 1;
-				ScorePlayer1 += random_number1; // Random the number
-				HAL_Delay(100);
-			} else if (SPIRx[2] == 11) // Button 2 pressed (0000 0010) P1 stand
-					{
-				click = 1;
-				P1Finish = 1;
-				HAL_Delay(100);
-			} else if (SPIRx[2] == 13) // Button 3 pressed (0000 0100) P2 hit
-					{
-				click = 1;
-				ScorePlayer2 += random_number2; // Random the number
-				HAL_Delay(100);
-			} else if (SPIRx[2] == 14) // Button 4 pressed (0000 1000) P2 stand
-					{
-				click = 1;
-				P2Finish = 1;
-				HAL_Delay(100);
-			}
-		}
+	if (SPIRx[2] == 15){
+		click = 0;
 	}
+    if (click == 0)
+    {
+        if (SPIRx[2] == 7) // Button 1 pressed (0000 0001) P1 hit
+        {
+            click = 1;
+            ScorePlayer1 += random_number1; // Random the number
+            HAL_Delay(100);
+        }
+        else if (SPIRx[2] == 11) // Button 2 pressed (0000 0010) P1 stand
+        {
+            click = 1;
+            P1Finish = 1;
+            HAL_Delay(100);
+        }
+        else if (SPIRx[2] == 13) // Button 3 pressed (0000 0100) P2 hit
+        {
+            click = 1;
+            ScorePlayer2 += random_number2; // Random the number
+            HAL_Delay(100);
+        }
+        else if (SPIRx[2] == 14) // Button 4 pressed (0000 1000) P2 stand
+        {
+            click = 1;
+            P2Finish = 1;
+            HAL_Delay(100);
+        }
+    }
 }
 
 
@@ -548,28 +526,28 @@ void StateGame(){
 }
 
 
-//void LED() {
-//	if (HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_2)) {
-//		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, 0); // CS Select
-//		SPITx[0] = 0b01000000; // write
-//		SPITx[1] = 0x15; // OLATB
-//		if (State == 3) { //tie
-//			SPITx[2] = 0b11111110; // LED ON
-//		}
-//		if (State == 1) { // p1 win
-//				SPITx[2] = 0b11111110; // LED ON
-//		}
-//		if (State == 2) { //p2 win
-//				SPITx[2] = 0b11111110; // LED ON
-//		}
-//
-//		if (State == 0) { //playing
-//			SPITx[2] = 0b00010001; // LED ON
-//		}
-//
-//	HAL_SPI_TransmitReceive_IT(&hspi3, SPITx, SPIRx, 3);
-//		}
-//	}
+void LED() {
+	if (HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_2)) {
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, 0); // CS Select
+		SPITx[0] = 0b01000000; // write
+		SPITx[1] = 0x15; // OLATB
+		if (State == 3) { //tie
+			SPITx[2] = 0b11111110; // LED ON
+		}
+		if (State == 1) { // p1 win
+				SPITx[2] = 0b11111110; // LED ON
+		}
+		if (State == 2) { //p2 win
+				SPITx[2] = 0b11111110; // LED ON
+		}
+
+		if (State == 0) { //playing
+			SPITx[2] = 0b00010001; // LED ON
+		}
+
+	HAL_SPI_TransmitReceive_IT(&hspi3, SPITx, SPIRx, 3);
+		}
+	}
 
 /* USER CODE END 4 */
 
