@@ -142,10 +142,16 @@ int main(void)
 
 	  SPITxRx_readIO();
 
-	  RandomNum();
 	  Switch();
 	  StateGame();
 	  LED();
+
+	  srand(time(NULL));
+
+	      printf("Random between 1 to 10\n");
+	      for (int i = 0; i < 10; i++) {
+	         random_between(1, 10);
+	      }
 	  }
 
   }
@@ -437,6 +443,12 @@ void SPITxRx_readIO() {
 }
 void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi) {
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, 1); //CS dnSelect
+}
+
+int random_between(int min, int max)
+{
+    int r = (rand() / (float) RAND_MAX) * (max + 1) + min;
+    return r > max ? max: r;
 }
 
 void RandomNum(){
