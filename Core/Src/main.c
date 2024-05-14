@@ -72,6 +72,7 @@ int i;
 int click;
 
 int iterations = 10;
+int StateRT;
 
 
 /* USER CODE END PV */
@@ -435,10 +436,15 @@ void SPITxRx_Setup() {
 }
 void SPITxRx_readIO() {
 	if (HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_2)) {
+		if (StateRT == 0){
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, 0); // CS Select
 		SPITx[0] = 0b01000001; //what to do receive or transmit (1 == receive)
 		SPITx[1] = 0x12; //address
 		SPITx[2] = 0;
+		}
+		else if (StateRT == 1){
+			LED();
+		}
 		HAL_SPI_TransmitReceive_IT(&hspi3, SPITx, SPIRx, 3);
 	}
 }
@@ -452,6 +458,11 @@ void WriteLED(){
 }
 
 void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi) {
+	StateRT+=1;
+		if (StateRT>1)
+		{
+			StateRT = 0;
+		}
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, 1); //CS dnSelect
 }
 
@@ -525,10 +536,7 @@ void StateGame(){
 	}
 }
 
-
 void LED() {
-	if (HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_2)) {
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, 0); // CS Select
 		SPITx[0] = 0b01000000; // write
 		SPITx[1] = 0x15; // OLATB
 		if (State == 3) { //tie
@@ -540,12 +548,8 @@ void LED() {
 		if (State == 2) { //p2 win
 				SPITx[2] = 0b11111110; // LED ON
 		}
-
 		if (State == 0) { //playing
-			SPITx[2] = 0b00010001; // LED ON
-		}
-
-	HAL_SPI_TransmitReceive_IT(&hspi3, SPITx, SPIRx, 3);
+			SPITx[2] = 0b00000001; // LED ON
 		}
 	}
 
