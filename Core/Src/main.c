@@ -59,7 +59,7 @@ uint8_t eepromDataReadBack[4];
 uint8_t SPIRx[10];
 uint8_t SPITx[10];
 
-int State;
+int State = 0 ;
 int TotalScorePlayer1;
 int TotalScorePlayer2;
 int ScorePlayer1;
@@ -457,30 +457,43 @@ void RandomNum(){
 	            random_number2 = rand() % 10 + 1;
 	        } while (random_number2 == random_number1);
 
-	        printf("Random numbers: %d, %d\n", random_number1, random_number2);
 	    }
 }
 
 
 void Switch()
 {
-		if (SPIRx[2]== 7 ) // ปุ่ม 1 ถูกกด (0000 0001) P1 hit
-			{
-			ScorePlayer1 += random_number1; // random the number
-			}
-		else if (SPIRx[2] ==11) // ปุ่ม 2 ถูกกด (0000 0010) P1 stand
-			{
-			P1Finish = 1;
-			}
-		else if (SPIRx[2] == 13) // ปุ่ม 3 ถูกกด (0000 0100) P2 hit
-			{
-			ScorePlayer2 += random_number2; // random the number
-			}
-		else if (SPIRx[2] == 14) // ปุ่ม 4 ถูกกด (0000 1000) P2 stand
-			{
-			P2Finish = 1;
-			}
+	if (SPIRx[2] == 15){
+		click = 0;
 	}
+    if (click == 0)
+    {
+        if (SPIRx[2] == 7) // Button 1 pressed (0000 0001) P1 hit
+        {
+            click = 1;
+            ScorePlayer1 += random_number1; // Random the number
+            HAL_Delay(100);
+        }
+        else if (SPIRx[2] == 11) // Button 2 pressed (0000 0010) P1 stand
+        {
+            click = 1;
+            P1Finish = 1;
+            HAL_Delay(100);
+        }
+        else if (SPIRx[2] == 13) // Button 3 pressed (0000 0100) P2 hit
+        {
+            click = 1;
+            ScorePlayer2 += random_number2; // Random the number
+            HAL_Delay(100);
+        }
+        else if (SPIRx[2] == 14) // Button 4 pressed (0000 1000) P2 stand
+        {
+            click = 1;
+            P2Finish = 1;
+            HAL_Delay(100);
+        }
+    }
+}
 
 
 void StateGame(){

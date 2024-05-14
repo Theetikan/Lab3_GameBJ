@@ -11,7 +11,7 @@
 ../Core/Src/main.c:429:6:SPITxRx_readIO	2
 ../Core/Src/main.c:438:6:HAL_SPI_TxRxCpltCallback	1
 ../Core/Src/main.c:442:6:RandomNum	3
-../Core/Src/main.c:465:6:Switch	5
-../Core/Src/main.c:486:6:StateGame	10
-../Core/Src/main.c:506:6:LED	5
-../Core/Src/main.c:538:6:Error_Handler	1
+../Core/Src/main.c:464:6:Switch	7
+../Core/Src/main.c:499:6:StateGame	10
+../Core/Src/main.c:519:6:LED	5
+../Core/Src/main.c:551:6:Error_Handler	1
