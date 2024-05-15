@@ -58,7 +58,7 @@ uint8_t eepromDataReadBack[2];
 
 uint8_t SPIRx[10];
 uint8_t SPITx[10];
-
+//uint8_t WhoWinBefore[2];
 int State = 0 ;
 int TotalScorePlayer1;
 int TotalScorePlayer2;
@@ -135,6 +135,7 @@ int main(void)
 	SPITxRx_Setup();
 	Round1 = 1;
 	Round2 = 1;
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -152,18 +153,16 @@ int main(void)
 		RandomNum1_3 = rand() % 10;
 		RandomNum2_3 = rand() % 10;
 
-	  EEPROMReadExample(eepromDataReadBack, 2);
-	  EEPROMWriteExample();
+//	  EEPROMReadExample(eepromDataReadBack, 2);
+//	  EEPROMWriteExample();
 
 	  SPITxRx_readIO();
 
 	  Switch();
 	  StateGame();
-	  LED();
-
-	  }
 
   }
+}
   /* USER CODE END 3 */
 
 /**
@@ -422,8 +421,8 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 void EEPROMWriteExample() {
 	if (eepromExampleWriteFlag && hi2c1.State == HAL_I2C_STATE_READY) {
-		static uint8_t data[2] = { 1, 2};
-		HAL_I2C_Mem_Write_IT(&hi2c1, EEPROM_ADDR, 0x2C, I2C_MEMADD_SIZE_16BIT,data, 2);
+	static uint8_t data[2] = {0x50, 1};
+	HAL_I2C_Mem_Write_IT(&hi2c1, EEPROM_ADDR, 0x2C, I2C_MEMADD_SIZE_16BIT,data, 2);
 		eepromExampleWriteFlag = 0;
 	}
 }
@@ -434,6 +433,7 @@ void EEPROMReadExample(uint8_t *Rdata, uint16_t len) {
 		eepromExampleReadFlag = 0;
 	}
 }
+
 
 void SPITxRx_Setup() {
 //CS pulse
@@ -520,7 +520,10 @@ void Switch()
 			} else if (SPIRx[2] == 14) // Button 4 pressed (0000 1000) P2 stand
 					{
 				click = 1;
-				// read
+				eepromExampleWriteFlag = 1;
+				eepromExampleReadFlag = 1;
+				EEPROMReadExample(eepromDataReadBack, 2);
+
 		}
 	}
 }
@@ -531,22 +534,62 @@ void StateGame(){
 		TotalScorePlayer1 = ScorePlayer1 ;
 		TotalScorePlayer2 = ScorePlayer2 ;
 		if (TotalScorePlayer1 == TotalScorePlayer2) {
-	       State = 3; //Tie
-		}
+				State = 3; //Tie
+			if (eepromExampleWriteFlag && hi2c1.State == HAL_I2C_STATE_READY) {
+				static uint8_t data[2] = { 0x50, 0x54 };
+				HAL_I2C_Mem_Write_IT(&hi2c1, EEPROM_ADDR, 0x2C,
+						I2C_MEMADD_SIZE_16BIT, data, 2);
+				eepromExampleWriteFlag = 0;
+			}
+			}
 		else if (TotalScorePlayer1 > 21 && TotalScorePlayer2 > 21) {
-	       State = 3; //Tie
+				State = 3; //Tie
+			if (eepromExampleWriteFlag && hi2c1.State == HAL_I2C_STATE_READY) {
+				static uint8_t data[2] = { 0x50, 0x54 };
+				HAL_I2C_Mem_Write_IT(&hi2c1, EEPROM_ADDR, 0x2C,
+				I2C_MEMADD_SIZE_16BIT, data, 2);
+				eepromExampleWriteFlag = 0;
+			}
 		}
 		else if (TotalScorePlayer1 > TotalScorePlayer2 && TotalScorePlayer1 <= 21) {
-	       State = 1; //Player1Win
+				State = 1; //Player1Win
+				if (eepromExampleWriteFlag
+						&& hi2c1.State == HAL_I2C_STATE_READY) {
+					static uint8_t data[2] = { 0x50, 1 };
+					HAL_I2C_Mem_Write_IT(&hi2c1, EEPROM_ADDR, 0x2C,
+					I2C_MEMADD_SIZE_16BIT, data, 2);
+					eepromExampleWriteFlag = 0;
+				}
 		}
 		else if (TotalScorePlayer2 > TotalScorePlayer1 && TotalScorePlayer2 <= 21) {
-	       State = 2; //Player2Win
-		}
+				State = 2; //Player2Win
+					if (eepromExampleWriteFlag
+							&& hi2c1.State == HAL_I2C_STATE_READY) {
+						static uint8_t data[2] = { 0x50, 2 };
+						HAL_I2C_Mem_Write_IT(&hi2c1, EEPROM_ADDR, 0x2C,
+						I2C_MEMADD_SIZE_16BIT, data, 2);
+						eepromExampleWriteFlag = 0;
+					}
+			}
 		else if (TotalScorePlayer2 >21 && TotalScorePlayer1 < 21 || TotalScorePlayer1 == 21  ) {
-			State = 1; //Player1Win
+				State = 1; //Player1Win
+					if (eepromExampleWriteFlag
+							&& hi2c1.State == HAL_I2C_STATE_READY) {
+						static uint8_t data[2] = { 0x50, 1 };
+						HAL_I2C_Mem_Write_IT(&hi2c1, EEPROM_ADDR, 0x2C,
+						I2C_MEMADD_SIZE_16BIT, data, 2);
+						eepromExampleWriteFlag = 0;
+					}
 		}
 		else if (TotalScorePlayer1 >21 && TotalScorePlayer2 < 21 || TotalScorePlayer2 == 21   ) {
 			State = 2; //Player1Win
+					if (eepromExampleWriteFlag
+							&& hi2c1.State == HAL_I2C_STATE_READY) {
+						static uint8_t data[2] = { 0x50, 2 };
+						HAL_I2C_Mem_Write_IT(&hi2c1, EEPROM_ADDR, 0x2C,
+						I2C_MEMADD_SIZE_16BIT, data, 2);
+						eepromExampleWriteFlag = 0;
+					}
 				}
 
 	}
