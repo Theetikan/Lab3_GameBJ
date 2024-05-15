@@ -66,10 +66,15 @@ int ScorePlayer1;
 int ScorePlayer2;
 int P1Finish;
 int P2Finish;
-int random_number1;
-int random_number2;
 int i;
 int click;
+int RandomNum1_1;
+int RandomNum2_1;
+int RandomNum1_2;
+int RandomNum2_2;
+int RandomNum1_3;
+int RandomNum2_3;
+int Round;
 
 int iterations = 10;
 int StateRT;
@@ -127,8 +132,7 @@ int main(void)
   MX_SPI3_Init();
   /* USER CODE BEGIN 2 */
   SPITxRx_Setup();
-  WriteLED();
-
+  Round =1;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -148,11 +152,6 @@ int main(void)
 	  Switch();
 	  StateGame();
 	  LED();
-
-	  //Random Number
-		srand(time(NULL));
-		random_number1 = random_between(1, 10);
-		random_number2 = random_between(1, 10);
 
 	  }
 
@@ -467,16 +466,16 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi) {
 }
 
 
-int random_between(int min, int max)
-{
-    int r = (rand() / (float) RAND_MAX) * (max + 1) + min;
-    return r > max ? max: r;
-
-}
-
-
 void Switch()
 {
+	//Random Number
+	RandomNum1_1 = rand() % 10;
+	RandomNum2_1 = rand() % 10;
+	RandomNum1_2 = rand() % 10;
+	RandomNum2_2 = rand() % 10;
+	RandomNum1_3 = rand() % 10;
+	RandomNum2_3 = rand() % 10;
+
 	if (SPIRx[2] == 15){
 		click = 0;
 	}
@@ -484,27 +483,47 @@ void Switch()
     {
         if (SPIRx[2] == 7) // Button 1 pressed (0000 0001) P1 hit
         {
-            click = 1;
-            ScorePlayer1 += random_number1; // Random the number
-            HAL_Delay(100);
+        	if (Round == 1){
+        		click = 1;
+        		ScorePlayer1 += RandomNum1_1; // Random the number
+        		Round += 1;
+        	}
+        	else if (Round == 2){
+				click = 1;
+				ScorePlayer1 += RandomNum1_2; // Random the number
+				Round += 1;
+			}
+        	else if (Round == 3){
+				click = 1;
+				ScorePlayer1 += RandomNum1_3; // Random the number
+				Round = 1;
+			}
         }
         else if (SPIRx[2] == 11) // Button 2 pressed (0000 0010) P1 stand
         {
             click = 1;
             P1Finish = 1;
-            HAL_Delay(100);
         }
         else if (SPIRx[2] == 13) // Button 3 pressed (0000 0100) P2 hit
         {
-            click = 1;
-            ScorePlayer2 += random_number2; // Random the number
-            HAL_Delay(100);
+			if (Round == 1) {
+				click = 1;
+				ScorePlayer2 += RandomNum2_1; // Random the number
+				Round += 1;
+			} else if (Round == 2) {
+				click = 1;
+				ScorePlayer2 += RandomNum2_2; // Random the number
+				Round += 1;
+			} else if (Round == 3) {
+				click = 1;
+				ScorePlayer2 += RandomNum2_3; // Random the number
+				Round = 1;
+			}
         }
         else if (SPIRx[2] == 14) // Button 4 pressed (0000 1000) P2 stand
         {
             click = 1;
             P2Finish = 1;
-            HAL_Delay(100);
         }
     }
 }
@@ -537,19 +556,20 @@ void StateGame(){
 }
 
 void LED() {
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, 0);
 		SPITx[0] = 0b01000000; // write
-		SPITx[1] = 0x15; // OLATB
+		SPITx[1] = 0x01; // OLATB
 		if (State == 3) { //tie
-			SPITx[2] = 0b11111110; // LED ON
+			SPITx[2] = 0b11101111; // LED ON 4
 		}
 		if (State == 1) { // p1 win
-				SPITx[2] = 0b11111110; // LED ON
+				SPITx[2] = 0b10111111; // LED ON 2
 		}
 		if (State == 2) { //p2 win
-				SPITx[2] = 0b11111110; // LED ON
+				SPITx[2] = 0b11011111; // LED ON 3
 		}
 		if (State == 0) { //playing
-			SPITx[2] = 0b00010001; // LED ON
+			SPITx[2] = 0b01111111; // LED ON 1
 		}
 	}
 
