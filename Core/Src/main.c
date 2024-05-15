@@ -54,7 +54,7 @@ SPI_HandleTypeDef hspi3;
 /* USER CODE BEGIN PV */
 uint8_t eepromExampleWriteFlag = 0;
 uint8_t eepromExampleReadFlag = 0;
-uint8_t eepromDataReadBack[4];
+uint8_t eepromDataReadBack[2];
 
 uint8_t SPIRx[10];
 uint8_t SPITx[10];
@@ -135,12 +135,6 @@ int main(void)
 	SPITxRx_Setup();
 	Round1 = 1;
 	Round2 = 1;
-	RandomNum1_1 = rand() % 10;
-	RandomNum2_1 = rand() % 10;
-	RandomNum1_2 = rand() % 10;
-	RandomNum2_2 = rand() % 10;
-	RandomNum1_3 = rand() % 10;
-	RandomNum2_3 = rand() % 10;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -151,8 +145,14 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  EEPROMReadExample(eepromDataReadBack, 4);
-	  HAL_Delay(100);
+		RandomNum1_1 = rand() % 10;
+		RandomNum2_1 = rand() % 10;
+		RandomNum1_2 = rand() % 10;
+		RandomNum2_2 = rand() % 10;
+		RandomNum1_3 = rand() % 10;
+		RandomNum2_3 = rand() % 10;
+
+	  EEPROMReadExample(eepromDataReadBack, 2);
 	  EEPROMWriteExample();
 
 	  SPITxRx_readIO();
@@ -422,17 +422,18 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 void EEPROMWriteExample() {
 	if (eepromExampleWriteFlag && hi2c1.State == HAL_I2C_STATE_READY) {
-		static uint8_t data[4] = { 0x50, 0x4F, 0x4E, 0x31 };
-		HAL_I2C_Mem_Write_IT(&hi2c1, EEPROM_ADDR, 0x2C, I2C_MEMADD_SIZE_16BIT,data, 4);
+		static uint8_t data[2] = { 1, 2};
+		HAL_I2C_Mem_Write_IT(&hi2c1, EEPROM_ADDR, 0x2C, I2C_MEMADD_SIZE_16BIT,data, 2);
 		eepromExampleWriteFlag = 0;
 	}
 }
 
 void EEPROMReadExample(uint8_t *Rdata, uint16_t len) {
+	if (eepromExampleReadFlag && hi2c1.State == HAL_I2C_STATE_READY) {
 		HAL_I2C_Mem_Read_IT(&hi2c1, EEPROM_ADDR, 0x2C, I2C_MEMADD_SIZE_16BIT,Rdata, len);
 		eepromExampleReadFlag = 0;
 	}
-
+}
 
 void SPITxRx_Setup() {
 //CS pulse
@@ -500,6 +501,7 @@ void Switch()
 					{
 				click = 1;
 				P1Finish = 1;
+				P2Finish = 1;
 			} else if (SPIRx[2] == 13) // Button 3 pressed (0000 0100) P2 hit
 					{
 				if (Round2 == 1) {
@@ -518,7 +520,7 @@ void Switch()
 			} else if (SPIRx[2] == 14) // Button 4 pressed (0000 1000) P2 stand
 					{
 				click = 1;
-				P2Finish = 1;
+				// read
 		}
 	}
 }
@@ -559,10 +561,10 @@ void LED() {
 			SPITx[2] = 0b11101111; // LED ON 4
 		}
 		if (State == 1) { // p1 win
-				SPITx[2] = 0b10111111; // LED ON 2
+			SPITx[2] = 0b10111111; // LED ON 2
 		}
 		if (State == 2) { //p2 win
-				SPITx[2] = 0b11011111; // LED ON 3
+			SPITx[2] = 0b11011111; // LED ON 3
 		}
 		if (State == 0) { //playing
 			SPITx[2] = 0b01111111; // LED ON 1
